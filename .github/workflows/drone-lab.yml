@@ -1,0 +1,72 @@
+name: Drone Lab
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: drone-lab-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check controller and neuron model
+        run: node --test experiments/drone/tests/core.test.cjs
+      - name: Build exact neuron index
+        run: python3 scripts/build_drone_index.py
+      - name: Check actual FlyWire data
+        run: node --test experiments/drone/tests/real-data.test.cjs
+      - name: Install browser checker
+        run: |
+          npm install --prefix "$RUNNER_TEMP/drone-browser" --no-audit --no-fund --package-lock=false playwright@1.55.1
+          "$RUNNER_TEMP/drone-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Check browser
+        env:
+          PLAYWRIGHT_MODULE: ${{ runner.temp }}/drone-browser/node_modules/playwright
+        run: node experiments/drone/tests/browser.cjs
+      - name: Save browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: drone-browser-check
+          path: |
+            drone-smoke.png
+            drone-browser-results.json
+          if-no-files-found: ignore
+      - name: Package static site
+        run: |
+          mkdir -p _site/data _site/experiments
+          cp index.html license.md _site/
+          cp -R css js svg _site/
+          cp -R experiments/drone _site/experiments/
+          cp data/connectome.bin.gz data/neuron_meta.json data/coordinates.csv.gz data/drone-index.json _site/data/
+          touch _site/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+  deploy:
+    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+      - uses: actions/deploy-pages@v4
+        id: deployment

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101b1c">
+<title>FlyBrain · Drone Lab</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <a class="brand" href="../../"><span class="mark" aria-hidden="true">◉</span> FlyBrain <span>/ Drone Lab</span></a>
+  <div class="status"><span id="status-dot"></span><span id="status">Loading neural model…</span></div>
+  <a class="source" href="https://github.com/bquast/flybrain">Source ↗</a>
+</header>
+<main>
+<section class="flight">
+  <div class="toolbar">
+    <div><span class="eyebrow">EXPERIMENT 01</span><h1>A fly's view of flight.</h1></div>
+    <div class="views" role="group" aria-label="Camera view">
+      <button id="fpv" class="selected" aria-pressed="true">FPV</button>
+      <button id="chase" aria-pressed="false">Chase</button>
+    </div>
+  </div>
+  <div id="viewport">
+    <div class="corner top-left"><span id="mode-label">NEURAL READOUT</span><small id="scenario-label">Forest · seed 42</small></div>
+    <div class="corner top-right"><span id="clock">00:00.0</span><small id="factor">SIMULATION TIME</small></div>
+    <div class="reticle" aria-hidden="true"><i></i><b></b></div>
+    <div id="message"><strong>Ready for takeoff</strong><span>The neural model is loading. You can try the vision baseline while it loads.</span></div>
+    <div class="instruments">
+      <div><small>ALTITUDE</small><strong id="altitude">3.0 <em>m</em></strong></div>
+      <div><small>AIRSPEED</small><strong id="speed">0.0 <em>m/s</em></strong></div>
+      <div><small>DISTANCE</small><strong id="distance">0 <em>m</em></strong></div>
+      <div><small>THROTTLE</small><strong id="throttle">45 <em>%</em></strong></div>
+    </div>
+  </div>
+  <div class="flight-actions">
+    <button id="start" class="primary" disabled>Launch</button>
+    <button id="reset">Reset trial</button>
+    <button id="export">Export CSV</button>
+    <span id="trial-info">Fixed seed · target altitude 3 m</span>
+  </div>
+  <div class="note">Vision supplies avoidance decisions. An attitude and altitude controller keeps the simulated quadcopter stable.</div>
+</section>
+<aside>
+  <section class="panel">
+    <span class="eyebrow">FLIGHT SETTINGS</span>
+    <label for="controller">Controller</label>
+    <select id="controller"><option value="neural">Connectome readout</option><option value="vision">Direct vision baseline</option></select>
+    <label for="scenario">Environment</label>
+    <select id="scenario"><option value="forest">Forest flight</option><option value="loom">Expanding-object bench</option><option value="dimming">Uniform-dimming bench</option></select>
+    <div class="setting-row"><label for="seed">Forest seed</label><input id="seed" type="number" min="0" max="4294967295" value="42"></div>
+    <div class="setting-row"><label for="latency">Added command delay</label><output id="latency-value" for="latency">50 ms</output></div>
+    <input id="latency" type="range" min="0" max="200" step="10" value="50">
+    <div class="range-ends"><span>0 ms</span><span>200 ms</span></div>
+  </section>
+  <section class="panel">
+    <div class="section-title"><span class="eyebrow">COMPOUND-EYE SAMPLES</span><span>800 / eye</span></div>
+    <div class="eyes"><figure><canvas id="left-eye" width="256" height="200" aria-label="Left retinal samples"></canvas><figcaption>LEFT</figcaption></figure><figure><canvas id="right-eye" width="256" height="200" aria-label="Right retinal samples"></canvas><figcaption>RIGHT</figcaption></figure></div>
+    <p class="small">Perspective samples; approximate eye geometry.</p>
+  </section>
+  <section class="panel activity">
+    <div class="section-title"><span class="eyebrow">NEURAL ACTIVITY</span><span>L / R</span></div>
+    <div id="probes"></div>
+    <div class="silence"><span>Silence circuit</span><label><input id="mute-lplc2" type="checkbox"> LPLC2</label><label><input id="mute-lc4" type="checkbox"> LC4</label></div>
+    <div class="stats"><span id="active-count">0 active neurons</span><span id="compute-time">— ms / step</span></div>
+    <p class="small">LC4 and LPLC2 receive engineered looming features. Bars show simulated rates, including directly stimulated cells. LC11 and descending cells are observation probes.</p>
+  </section>
+  <details class="panel"><summary>About this experiment</summary>
+    <p>FlyWire v783 supplies the brain's connections. A bounded rate model propagates activity through that graph. A hand-tuned adapter converts bilateral LPLC2/LC4 activity to steering and speed; it has not been trained.</p>
+    <p>The ventral nerve cord is not included. Soma-side labels are a coarse routing assumption, not measured visual receptive fields. The expanding-object and dimming benches hold the drone still and feed synthetic retinal frames.</p>
+    <p>The delay slider adds simulation-time command latency. Measured compute time and simulation speed are shown separately. Setting changes restart the trial for comparison.</p>
+    <a href="README.md">Methods and sources ↗</a>
+  </details>
+</aside>
+</main>
+<script src="../../js/vendor/three.min.js"></script>
+<script src="core.js"></script>
+<script src="app.js"></script>
+</body></html>

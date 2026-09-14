@@ -1,3 +1,13 @@
+# FlyBrain experiments
+
+This fork adds a **[Drone Lab](experiments/drone/README.md)** on the **master** branch: FPV forest flight, identified LPLC2/LC4 readouts, latency controls, vision baseline and CSV trials. See its methods and setup instructions before interpreting the neural activity.
+
+Open `experiments/drone/` on the deployed site. Enable GitHub Actions in Settings → Pages for the included deployment workflow.
+
+---
+
+## Upstream project
+
 # FlyBrain
 
 Interactive browser simulation of the *Drosophila melanogaster* (fruit fly) brain. 139,255 neurons and 2.7M connections from the [FlyWire FAFB v783](https://codex.flywire.ai) connectome run in real time via a leaky integrate-and-fire model in a Web Worker.
