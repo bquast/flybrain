@@ -1,4 +1,4 @@
-name: Drone Lab
+name: Drone Lab checks
 on:
   push:
     branches: [master]
@@ -25,6 +25,7 @@ jobs:
       - name: Check controller and neuron model
         run: node --test experiments/drone/tests/core.test.cjs
       - name: Build exact neuron index
+        if: hashFiles('data/drone-index.json') == ''
         run: python3 scripts/build_drone_index.py
       - name: Check actual FlyWire data
         run: node --test experiments/drone/tests/real-data.test.cjs
@@ -45,28 +46,3 @@ jobs:
             drone-smoke.png
             drone-browser-results.json
           if-no-files-found: ignore
-      - name: Package static site
-        run: |
-          mkdir -p _site/data _site/experiments
-          cp index.html license.md _site/
-          cp -R css js svg _site/
-          cp -R experiments/drone _site/experiments/
-          cp data/connectome.bin.gz data/neuron_meta.json data/coordinates.csv.gz data/drone-index.json _site/data/
-          touch _site/.nojekyll
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
-  deploy:
-    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/configure-pages@v5
-      - uses: actions/deploy-pages@v4
-        id: deployment
