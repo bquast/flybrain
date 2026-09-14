@@ -2,7 +2,7 @@
 
 This fork adds a **[Drone Lab](experiments/drone/README.md)** on the **master** branch: FPV forest flight, identified LPLC2/LC4 readouts, latency controls, vision baseline and CSV trials. See its methods and setup instructions before interpreting the neural activity.
 
-Open `experiments/drone/` on the deployed site. Enable GitHub Actions in Settings → Pages for the included deployment workflow.
+Open `experiments/drone/` on the deployed site. In Settings → Pages use **Deploy from a branch → master → /(root)**. The generated neuron index is committed, so the neural controller works with static branch publishing.
 
 ---
 

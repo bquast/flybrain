@@ -5,15 +5,16 @@ First prototype: seeded forest flight, FPV/chase cameras, bilateral visual sampl
 ## Run
 
 ```sh
-python3 scripts/build_drone_index.py
 python3 -m http.server 8000
 ```
 
-Open http://localhost:8000/experiments/drone/. No npm install is needed to run the site. The annotation build downloads a pinned public FlyWire table; use --annotations PATH to reuse a local copy. The vision baseline can run without that index.
+Open http://localhost:8000/experiments/drone/. No npm install or data build is needed to run the site: the neuron index is committed in data/drone-index.json. To regenerate it, run python3 scripts/build_drone_index.py; that optional build downloads the pinned public FlyWire table.
 
 ## GitHub Pages
 
-In Settings → Pages, choose **GitHub Actions**. The Drone Lab workflow builds, checks and deploys pushes to **master**. After enabling Pages, rerun the workflow if needed. The project URL after deployment is https://bquast.github.io/flybrain/experiments/drone/ . The upstream custom domain is not used.
+In Settings → Pages, choose **Deploy from a branch**, **master**, and **/(root)**. Every ordinary push to master publishes the committed static files. The neuron index is included in the branch, and .nojekyll disables Jekyll processing. No custom Actions deployment or build step is required.
+
+Open https://bquast.github.io/flybrain/experiments/drone/ . The Drone Lab checks workflow performs validation only; GitHub's own Pages workflow handles publishing. The upstream custom domain is not used.
 
 ## Methods and limits
 
