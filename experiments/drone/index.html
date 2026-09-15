@@ -17,8 +17,8 @@
   <div class="toolbar">
     <div><span class="eyebrow">EXPERIMENT 01</span><h1>A fly's view of flight.</h1></div>
     <div class="views" role="group" aria-label="Camera view">
-      <button id="fpv" class="selected" aria-pressed="true">FPV</button>
-      <button id="chase" aria-pressed="false">Chase</button>
+      <button id="fpv" aria-pressed="false">FPV</button>
+      <button id="chase" class="selected" aria-pressed="true">Chase</button>
     </div>
   </div>
   <div id="viewport">
@@ -63,11 +63,11 @@
     <div id="probes"></div>
     <div class="silence"><span>Silence circuit</span><label><input id="mute-lplc2" type="checkbox"> LPLC2</label><label><input id="mute-lc4" type="checkbox"> LC4</label></div>
     <div class="stats"><span id="active-count">0 active neurons</span><span id="compute-time">— ms / step</span></div>
-    <p class="small">LC4 and LPLC2 receive engineered looming features. Bars show simulated rates, including directly stimulated cells. LC11 and descending cells are observation probes.</p>
+    <p class="small">LC4 and LPLC2 receive engineered looming features. Bars show simulated rates, including directly stimulated cells. LC11, descending and motor cells are observation probes.</p>
   </section>
   <details class="panel"><summary>About this experiment</summary>
-    <p>FlyWire v783 supplies the brain's connections. A bounded rate model propagates activity through that graph. A hand-tuned adapter converts bilateral LPLC2/LC4 activity to steering and speed; it has not been trained.</p>
-    <p>The ventral nerve cord is not included. Soma-side labels are a coarse routing assumption, not measured visual receptive fields. The expanding-object and dimming benches hold the drone still and feed synthetic retinal frames.</p>
+    <p><a href="https://male-cns.janelia.org/">MaleCNS v1.0</a> supplies connections across the brain, optic lobes and ventral nerve cord. A bounded rate model propagates activity through that graph. A hand-tuned adapter converts bilateral LPLC2/LC4 activity to steering and speed; it has not been trained.</p>
+    <p>The nerve cord's circuits are simulated; descending and motor activity is monitored. Steering still reads LPLC2/LC4. Soma-side labels (nerve-entry side for sensory cells without a soma label) are a coarse routing assumption, not measured visual receptive fields. The stimulus benches hold the drone still.</p>
     <p>The delay slider adds simulation-time command latency. Measured compute time and simulation speed are shown separately. Setting changes restart the trial for comparison.</p>
     <a href="README.md">Methods and sources ↗</a>
   </details>

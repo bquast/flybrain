@@ -1,20 +1,15 @@
 'use strict';
-importScripts('./brain.js');
+importScripts('../../js/datasets.js','./brain.js');
 let brain=null;
 self.onmessage=async function(event){
   const m=event.data;
   try{
     if(m.type==='init'){
-      self.postMessage({type:'progress',text:'Loading connectome and cell annotations…'});
-      const responses=await Promise.all([fetch('../../data/connectome.bin.gz'),fetch('../../data/drone-index.json')]);
-      for(const r of responses)if(!r.ok)throw Error(r.url.includes('drone-index')?'Neuron index is missing. Run python3 scripts/build_drone_index.py, or use the Pages build.':'Connectome download failed: HTTP '+r.status);
-      const index=await responses[1].json();
-      self.postMessage({type:'progress',text:'Decompressing 139,255 neurons…'});
-      if(typeof DecompressionStream==='undefined')throw Error('This experiment requires a browser with gzip DecompressionStream support.');
-      const raw=await new Response(responses[0].body.pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
-      brain=new DroneBrain.BrainModel(raw,index);
+      self.postMessage({type:'progress',text:'Loading dataset…'});
+      const {buffer,index,dataset}=await FlyBrainDatasets.load('../../data/dataset.json',text=>self.postMessage({type:'progress',text}));
+      brain=new DroneBrain.BrainModel(buffer,index);
       const counts={};for(const [name,sides] of Object.entries(index.groups)){counts[name]={};for(const [side,ids] of Object.entries(sides))counts[name][side]=ids.length;}
-      self.postMessage({type:'ready',neurons:brain.n,edges:brain.edgeCount,counts,source:index.source});
+      self.postMessage({type:'ready',neurons:brain.n,edges:brain.edgeCount,counts,dataset,source:index.source});
     }else if(m.type==='reset'){
       if(brain)brain.reset();
       self.postMessage({type:'reset',id:m.id});

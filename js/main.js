@@ -719,7 +719,7 @@ connectomeToggleBtn.addEventListener('click', function () {
 	if (NeuroRenderer.isActive()) {
 		NeuroRenderer.destroy();
 		nodeHolder.classList.remove('hidden');
-		connectomeToggleBtn.textContent = '139K View';
+		connectomeToggleBtn.textContent = 'Neuron View';
 	} else {
 		if (NeuroRenderer.init()) {
 			connectomeToggleBtn.textContent = 'Groups';
