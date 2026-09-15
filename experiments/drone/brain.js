@@ -1,4 +1,4 @@
-/* A bounded rate model over the unchanged FlyWire graph, in original
+/* A bounded rate model over the selected connectome graph, in canonical
  * neuron order. This is an experimental dynamical model, not fitted physiology.
  */
 (function(root){
@@ -8,6 +8,7 @@ class BrainModel {
     if(!(buffer instanceof ArrayBuffer)||buffer.byteLength<8)throw Error('Invalid connectome buffer.');
     const v=new DataView(buffer);this.n=v.getUint32(0,true);this.edgeCount=v.getUint32(4,true);
     if(this.n!==index.neuron_count)throw Error('Annotation/connectome neuron count mismatch.');
+    if(index.edge_count!==undefined&&this.edgeCount!==index.edge_count)throw Error('Annotation/connectome edge count mismatch.');
     if(buffer.byteLength!==8+12*this.edgeCount+3*this.n)throw Error('Truncated or incompatible connectome.');
     this.groups=index.groups;this.index=index;
     this.row=new Uint32Array(this.n+1);this.col=new Uint32Array(this.edgeCount);this.weight=new Float32Array(this.edgeCount);
@@ -48,7 +49,7 @@ class BrainModel {
       for(let i=0;i<this.n;i++)this.rates[i]=this.muted[i]?0:this.rates[i]+alpha*(Math.max(0,Math.min(1,this.sum[i]))-this.rates[i]);
     }
     const output={left:{lplc2:this.mean('LPLC2','left'),lc4:this.mean('LC4','left')},right:{lplc2:this.mean('LPLC2','right'),lc4:this.mean('LC4','right')},probes:{},active:0};
-    for(const name of ['LPLC2','LC4','LC11','GF','descending'])output.probes[name]={left:this.mean(name,'left'),right:this.mean(name,'right')};
+    for(const name of ['LPLC2','LC4','LC11','GF','descending','motor'])output.probes[name]={left:this.mean(name,'left'),right:this.mean(name,'right')};
     for(const r of this.rates)if(r>.001)output.active++;
     return output;
   }

@@ -3,16 +3,17 @@
 'use strict';
 const C=DroneCore,$=id=>document.getElementById(id),DT=1/30;
 let renderer,scene,fpv,chase,eyeCamera,eyeTarget,forestMesh,quad,ground;
-let view='fpv',running=false,busy=false,ready=false,epoch=0,nextFrame=0,startedWall=0,simStarted=0;
+let view='chase',running=false,busy=false,ready=false,epoch=0,nextFrame=0,startedWall=0,simStarted=0;
+let dataset=null;
 let neuralMs=0,roundTrip=0,lastOutput=null,rows=[],worker=null,nextId=0;
 const pending=new Map(),drone=new C.Drone(),delay=new C.DelayQueue(),encoders=[new C.EyeEncoder(),new C.EyeEncoder()];
 let trees=C.makeForest(42),lastEyes=[new Float32Array(800),new Float32Array(800)];
 const viewport=$('viewport'),bench=document.createElement('canvas');
 bench.width=640;bench.height=300;bench.style.display='none';viewport.appendChild(bench);
 const benchContext=bench.getContext('2d');
-for(const name of ['LPLC2','LC4','LC11','GF','descending']){
+for(const name of ['LPLC2','LC4','LC11','GF','descending','motor']){
   const row=document.createElement('div');row.className='probe';
-  const label=document.createElement('span');label.textContent=name==='descending'?'DNs':name;row.appendChild(label);
+  const label=document.createElement('span');label.textContent=name==='descending'?'DNs':name==='motor'?'Motor':name;row.appendChild(label);
   for(const side of ['left','right']){
     const track=document.createElement('div');track.className='meter';track.setAttribute('role','meter');
     track.setAttribute('aria-label',name+' '+side+' activation');track.setAttribute('aria-valuemin','0');track.setAttribute('aria-valuemax','1');
@@ -42,9 +43,11 @@ function initWorker(){
     const m=e.data;
     if(m.type==='progress')$('status').textContent=m.text;
     else if(m.type==='ready'){
-      ready=true;$('status').textContent=m.neurons.toLocaleString()+' neurons · '+m.edges.toLocaleString()+' edges';
+      dataset=m.dataset;
+      ready=true;$('status').textContent=dataset.label+' · '+m.neurons.toLocaleString()+' neurons';
+      $('status').title=m.edges.toLocaleString()+' neuron-pair edges · brain and ventral nerve cord';
       $('status-dot').style.background='var(--accent)';
-      for(const name of ['LPLC2','LC4','LC11','GF','descending'])for(const side of ['left','right']){
+      for(const name of ['LPLC2','LC4','LC11','GF','descending','motor'])for(const side of ['left','right']){
         $('probe-'+name+'-'+side).parentElement.title=(m.counts[name]?.[side]||0)+' annotated neurons';
       }
       window.droneLab.counts=m.counts;updateStart();
@@ -146,7 +149,7 @@ function updateHUD(){
   $('throttle').innerHTML=Math.round(drone.throttle*100)+' <em>%</em>';
   const t=drone.time;$('clock').textContent=String(Math.floor(t/60)).padStart(2,'0')+':'+(t%60).toFixed(1).padStart(4,'0');
   if(running&&startedWall){const wall=(performance.now()-startedWall)/1000;$('factor').textContent=((t-simStarted)/Math.max(.1,wall)).toFixed(2)+'× REAL TIME';}
-  for(const name of ['LPLC2','LC4','LC11','GF','descending'])for(const side of ['left','right']){
+  for(const name of ['LPLC2','LC4','LC11','GF','descending','motor'])for(const side of ['left','right']){
     const v=lastOutput?.probes?.[name]?.[side]||0,fill=$('probe-'+name+'-'+side);
     fill.style.width=(C.clamp(v)*100)+'%';fill.parentElement.setAttribute('aria-valuenow',v.toFixed(4));
   }
@@ -187,7 +190,7 @@ async function stepOnce(){
     if(kind==='forest')for(let j=0;j<4;j++)drone.step(delay.sample(drone.time),DT/4,trees);
     else drone.time+=DT;
     const applied=delay.sample(drone.time);
-    if(rows.length<18000)rows.push({time:drone.time,scenario:kind,controller:neural?'connectome':'vision',seed:seedValue(),delay_ms:Number($('latency').value),muted_lplc2:$('mute-lplc2').checked,muted_lc4:$('mute-lc4').checked,x:drone.x,y:drone.y,z:drone.z,speed:Math.hypot(drone.vx,drone.vz),yaw:drone.yaw,feature_left:features[0].lplc2,feature_right:features[1].lplc2,neural_left:output?.left.lplc2??'',neural_right:output?.right.lplc2??'',steer:applied.steer,target_speed:applied.speed,compute_ms:neural?neuralMs:0,roundtrip_ms:neural?roundTrip:0,crashed:drone.crashed});
+    if(rows.length<18000)rows.push({dataset:neural?dataset.id:'none',time:drone.time,scenario:kind,controller:neural?'connectome':'vision',seed:seedValue(),delay_ms:Number($('latency').value),muted_lplc2:$('mute-lplc2').checked,muted_lc4:$('mute-lc4').checked,x:drone.x,y:drone.y,z:drone.z,speed:Math.hypot(drone.vx,drone.vz),yaw:drone.yaw,feature_left:features[0].lplc2,feature_right:features[1].lplc2,neural_left:output?.left.lplc2??'',neural_right:output?.right.lplc2??'',steer:applied.steer,target_speed:applied.speed,compute_ms:neural?neuralMs:0,roundtrip_ms:neural?roundTrip:0,crashed:drone.crashed});
     showBench();updateHUD();
     if(drone.crashed){
       running=false;$('start').textContent='Launch again';
@@ -221,7 +224,7 @@ $('export').onclick=()=>{
 document.addEventListener('visibilitychange',()=>{
   if(document.hidden&&running){running=false;$('start').textContent='Resume';say('Paused while hidden','Resume to continue this trial without a catch-up burst.');}
 });
-window.droneLab={get ready(){return ready;},get state(){return {time:drone.time,y:drone.y,crashed:drone.crashed,rows:rows.length,running,busy,mode:$('controller').value,output:lastOutput};},stepOnce,reset:resetTrial};
+window.droneLab={get ready(){return ready;},get dataset(){return dataset;},get state(){return {time:drone.time,y:drone.y,crashed:drone.crashed,rows:rows.length,running,busy,view,mode:$('controller').value,output:lastOutput};},stepOnce,reset:resetTrial};
 try{initScene();lastEyes=['left','right'].map(captureEye);lastEyes.forEach((e,i)=>showEye($(i?'right-eye':'left-eye'),e));requestAnimationFrame(animate);initWorker();}
 catch(e){say('Unable to start the 3D viewer',e.message+' Please use a browser with WebGL enabled.');$('status').textContent='Viewer unavailable';$('start').disabled=true;}
 })();

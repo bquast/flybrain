@@ -5,6 +5,8 @@ node_modules/
 caretaker.log
 caretaker-decisions.log
 data/
+.cache/
+__pycache__/
 
 # Xcode
 ios/FlyBrain.xcodeproj/xcuserdata/

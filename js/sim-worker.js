@@ -119,11 +119,14 @@ function parseBinary(buffer) {
 
 	/* second pass -- fill colIdx, values, find maxAbsWeight */
 	var maxAbsW = 0;
+	var writeOffset = rowPtr.slice();
 	for (var e = 0; e < edgeCount; e++) {
 		var base = edgeOffset + e * 12;
-		colIdx[e] = view.getUint32(base + 4, true);
+		var source = view.getUint32(base, true);
+		var targetOffset = writeOffset[source]++;
+		colIdx[targetOffset] = view.getUint32(base + 4, true);
 		var rawW = view.getFloat32(base + 8, true);
-		values[e] = rawW;
+		values[targetOffset] = rawW;
 		var absW = rawW < 0 ? -rawW : rawW;
 		if (absW > maxAbsW) maxAbsW = absW;
 	}

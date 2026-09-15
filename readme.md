@@ -1,12 +1,14 @@
 # FlyBrain experiments
 
-This fork adds a **[Drone Lab](experiments/drone/README.md)** on the **master** branch: FPV forest flight, identified LPLC2/LC4 readouts, latency controls, vision baseline and CSV trials. See its methods and setup instructions before interpreting the neural activity.
+This fork runs **MaleCNS v1.0** in both the enclosure and **[Drone Lab](experiments/drone/README.md)** on **master**: 166,700 annotated neurons across the brain, optic lobes and ventral nerve cord, with 25,582,938 neuron-pair connections. Drone Lab provides autonomous forest flight, Chase view by default, identified LPLC2/LC4 readouts, latency controls, a vision baseline and CSV trials. See its methods and setup instructions before interpreting the neural activity.
 
 Open `experiments/drone/` on the deployed site. In Settings → Pages use **Deploy from a branch → master → /(root)**. The generated neuron index is committed, so the neural controller works with static branch publishing.
 
+See [dataset provenance and rebuilding](docs/DATASETS.md) and the [future gym direction](docs/GYM.md). The gym launcher is deferred; dataset loading is already shared.
+
 ---
 
-## Upstream project
+## Upstream project (historical description; uses the earlier FlyWire dataset)
 
 # FlyBrain
 

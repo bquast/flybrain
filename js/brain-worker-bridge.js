@@ -89,20 +89,28 @@
 	/* ---- initialization ---- */
 
 	function initBridge() {
-		var metaUrl = 'data/neuron_meta.json';
-		var binUrl = 'data/connectome.bin.gz';
+		var metaUrl, binUrl;
 		var subtitle = document.getElementById('connectomeSubtitle');
 		if (subtitle) {
 			subtitle.textContent = 'Loading connectome...';
 			subtitle.classList.add('loading');
 		}
 
-		fetch(metaUrl)
+		FlyBrainDatasets.manifest('data/dataset.json')
+			.then(function (selected) {
+				BRAIN.dataset = selected.data;
+				metaUrl = selected.urls.meta;
+				binUrl = selected.urls.connectome;
+				return fetch(metaUrl);
+			})
 			.then(function (res) {
 				if (!res.ok) throw new Error('HTTP ' + res.status + ' fetching ' + metaUrl);
 				return res.json();
 			})
 			.then(function (meta) {
+				if (meta.dataset !== BRAIN.dataset.id || meta.neuron_count !== BRAIN.dataset.neuron_count) {
+					throw new Error('Dataset metadata mismatch');
+				}
 				groupCount = meta.group_count;
 				groupSizes = meta.group_sizes;
 				for (var i = 0; i < meta.groups.length; i++) {
@@ -125,7 +133,7 @@
 				console.warn('connectome.bin.gz load failed, using 59-group BRAIN.update():', err);
 				BRAIN.update = legacyUpdate;
 				if (subtitle) {
-					subtitle.textContent = '59 neuron groups \u2014 FlyWire approximation (fallback)';
+					subtitle.textContent = '59 neuron groups \u2014 legacy approximation (fallback)';
 					subtitle.classList.remove('loading');
 				}
 			});
@@ -168,14 +176,14 @@
 			var subtitle = document.getElementById('connectomeSubtitle');
 			if (subtitle) {
 				subtitle.textContent = neuronCount.toLocaleString() + ' neurons / ' +
-					e.data.edgeCount.toLocaleString() + ' connections \u2014 FlyWire FAFB v783';
+					e.data.edgeCount.toLocaleString() + ' connections \u2014 ' + BRAIN.dataset.label;
 				subtitle.classList.remove('loading');
 			}
 			// Update header scale indicator
 			var scaleEl = document.getElementById('scaleIndicator');
 			if (scaleEl) {
 				scaleEl.textContent = neuronCount.toLocaleString() + ' neurons / ' +
-					e.data.edgeCount.toLocaleString() + ' connections \u2014 FlyWire FAFB v783';
+					e.data.edgeCount.toLocaleString() + ' connections \u2014 ' + BRAIN.dataset.label;
 				scaleEl.style.display = '';
 			}
 			break;
@@ -200,7 +208,7 @@
 				var activePct = Math.round(e.data.activeNeurons / e.data.totalNeurons * 100);
 				statsSubtitle.textContent = neuronCount.toLocaleString() + ' neurons (' +
 					firedPct + '% firing, ' + activePct + '% active groups, ' +
-					e.data.avgTickMs.toFixed(1) + 'ms/tick) \u2014 FlyWire FAFB v783';
+					e.data.avgTickMs.toFixed(1) + 'ms/tick) \u2014 ' + BRAIN.dataset.label;
 			}
 			break;
 
@@ -223,7 +231,7 @@
 		BRAIN.update = legacyUpdate;
 		var subtitle = document.getElementById('connectomeSubtitle');
 		if (subtitle) {
-			subtitle.textContent = '59 neuron groups \u2014 FlyWire approximation (fallback)';
+			subtitle.textContent = '59 neuron groups \u2014 legacy approximation (fallback)';
 			subtitle.classList.remove('loading');
 		}
 	}
@@ -271,6 +279,8 @@
 	}
 
 	function synthesizeMotorOutputs() {
+		// MaleCNS already contains VNC and motor neurons: use their actual rates.
+		if (BRAIN.dataset && BRAIN.dataset.has_vnc) return;
 		var desc = readPS('GNG_DESC');
 		var vcpg = readPS('VNC_CPG');
 

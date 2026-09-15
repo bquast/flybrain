@@ -23,11 +23,8 @@ jobs:
         with:
           python-version: '3.12'
       - name: Check controller and neuron model
-        run: node --test experiments/drone/tests/core.test.cjs
-      - name: Build exact neuron index
-        if: hashFiles('data/drone-index.json') == ''
-        run: python3 scripts/build_drone_index.py
-      - name: Check actual FlyWire data
+        run: node --test experiments/drone/tests/enclosure-loader.test.cjs experiments/drone/tests/core.test.cjs
+      - name: Check actual MaleCNS data and source identity
         run: node --test experiments/drone/tests/real-data.test.cjs
       - name: Install browser checker
         run: |

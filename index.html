@@ -57,9 +57,8 @@
             </div>
         </div>
         <div class="help-about">
-            <p>In 2024, a team of researchers mapped every single neuron in a fruit fly's brain -- all 139,255 of them, and the millions of connections between them. It was the first complete wiring diagram of an adult brain this complex. The work was led by Princeton and published in <em>Nature</em> (<a href="https://doi.org/10.1038/s41586-024-07558-y" target="_blank" rel="noopener noreferrer">Dorkenwald et al. 2024</a>).</p>
-            <p class="help-headline"><strong>This is that brain, running live in your browser.</strong></p>
-            <p>The fly you see is not following a script. Its behavior -- walking, eating, grooming, startling, flying -- emerges from real neural signals propagating through those mapped connections. Watch closely: every turn, startle, and grooming pass is 139,000 neurons voting.</p>
+            <p>This fork uses <a href="https://male-cns.janelia.org/" target="_blank" rel="noopener noreferrer">MaleCNS v1.0</a>, the male fruit fly connectome from HHMI Janelia, Cambridge, MRC LMB and Google Research. It covers the brain, optic lobes and ventral nerve cord.</p>
+            <p>The browser simulates 166,700 annotated neurons and 25.6 million directed neuron-pair connections. Its neural dynamics and the enclosure's behavior adapter are simplified models, not a reproduction of a living fly's physiology.</p>
             <p>A fruit fly brain fits on a pinhead but contains circuits for memory, navigation, fear, hunger, and decision-making. If we can simulate this brain in a web browser today, imagine what becomes possible as we map larger brains. The human brain has 86 billion neurons. We are probably going to see it mapped in our lifetime.</p>
         </div>
         <div class="help-overlay-divider"></div>
@@ -72,11 +71,11 @@
         </div>
         <div class="help-overlay-divider"></div>
         <div class="help-overlay-section-title">What you're watching</div>
-        <div class="help-item"><strong>The fly</strong> -- 139,255 real neurons deciding everything. Nobody scripts it; Claude takes care of it.</div>
+        <div class="help-item"><strong>The fly</strong> -- simulated MaleCNS neural activity coupled to a simplified behavior model; Claude takes care of the enclosure.</div>
         <div class="help-item"><strong>You</strong> -- tap near the fly to stir the air, closer is louder. Tap the fly itself and it startles, bolts, and settles, exactly as its brain is wired to. Buzz may file a safety concern about you.</div>
         <div class="help-item"><strong>Inbox</strong> -- requests Buzz files for the fly, reviewed and resolved by Claude. The left panel.</div>
         <div class="help-item"><strong>Drive meters</strong> -- bottom right: hunger, fear, fatigue, curiosity. These are the signals Buzz reads.</div>
-        <div class="help-item"><strong>Connectome strip</strong> -- bottom: all 139K neurons firing live, grouped Sensory / Central / Drives / Motor. Zoom the enclosure with the scroll wheel, or pinch on a touch screen.</div>
+        <div class="help-item"><strong>Connectome strip</strong> -- bottom: simulated activity across the MaleCNS neurons, grouped Sensory / Central / Drives / Motor. Zoom the enclosure with the scroll wheel, or pinch on a touch screen.</div>
         <div class="help-overlay-divider"></div>
         <p class="help-credits">Built by the Kainos Workday AI CoE.</p>
       </div>
@@ -85,7 +84,7 @@
         <div id="connectome-panel">
             <div class="connectome-header">
                 <span class="connectome-label">Connectome</span>
-                <button class="connectome-toggle-btn" id="connectomeToggleBtn" title="Toggle view (V)">139K View</button>
+                <button class="connectome-toggle-btn" id="connectomeToggleBtn" title="Toggle view (V)">Neuron View</button>
             </div>
             <div class="connectome-subtitle" id="connectomeSubtitle">Loading connectome...</div>
             <div id="nodeHolder" class="connectome-grid"></div>
@@ -187,12 +186,13 @@
     <script src="./js/vendor/OrbitControls.js"></script>
     <script type="text/javascript" src="./js/constants.js?v=24"></script>
     <script type="text/javascript" src="./js/connectome.js?v=24"></script>
-    <script type="text/javascript" src="./js/brain-worker-bridge.js?v=24"></script>
+    <script src="./js/datasets.js"></script>
+    <script type="text/javascript" src="./js/brain-worker-bridge.js?v=25"></script>
     <script type="text/javascript" src="./js/neuro-renderer.js?v=25"></script>
     <script type="text/javascript" src="./js/fly-logic.js?v=24"></script>
     <script type="text/javascript" src="./js/brain3d.js?v=24"></script>
     <script type="text/javascript" src="./js/education.js?v=24"></script>
-    <script type="text/javascript" src="./js/main.js?v=40"></script>
+    <script type="text/javascript" src="./js/main.js?v=41"></script>
     <script type="text/javascript" src="./js/caretaker-renderer.js?v=24"></script>
     <script type="text/javascript" src="./js/caretaker-sidebar.js?v=26"></script>
     <script type="text/javascript" src="./js/workday-panel.js?v=14"></script>

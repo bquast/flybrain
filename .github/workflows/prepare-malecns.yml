@@ -1,0 +1,52 @@
+name: Prepare MaleCNS dataset
+on:
+  push:
+    branches: [data/malecns-v1]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: prepare-malecns-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build the pinned public MaleCNS release
+        run: |
+          python -m pip install numpy==2.3.5 pandas==2.2.3 pyarrow==25.0.1
+          python scripts/build_malecns.py --raw-dir "$RUNNER_TEMP/malecns"
+      - name: Verify connectivity and controller
+        run: node --test experiments/drone/tests/enclosure-loader.test.cjs experiments/drone/tests/core.test.cjs experiments/drone/tests/real-data.test.cjs
+      - name: Verify both browser experiments
+        run: |
+          npm install --prefix "$RUNNER_TEMP/drone-browser" --no-audit --no-fund --package-lock=false playwright@1.55.1
+          "$RUNNER_TEMP/drone-browser/node_modules/.bin/playwright" install --with-deps chromium
+          PLAYWRIGHT_MODULE="$RUNNER_TEMP/drone-browser/node_modules/playwright" node experiments/drone/tests/browser.cjs
+      - name: Commit validated static data to the preparation branch
+        if: github.ref == 'refs/heads/data/malecns-v1'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -f data/dataset.json data/male-cns-v1.0/
+          if ! git diff --cached --quiet; then
+            git commit -m 'Build and validate the MaleCNS v1.0 browser dataset'
+            git push origin HEAD:data/malecns-v1
+          fi
+      - name: Save browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: malecns-browser-check
+          path: |
+            drone-smoke.png
+            drone-browser-results.json
+          if-no-files-found: ignore
