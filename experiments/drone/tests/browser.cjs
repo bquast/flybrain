@@ -5,7 +5,7 @@ const base=process.cwd(),types={'.html':'text/html','.js':'application/javascrip
 const server=http.createServer((req,res)=>{
   const url=new URL(req.url,'http://localhost');let pathname=decodeURIComponent(url.pathname);
   if(!pathname.startsWith('/flybrain/')){res.writeHead(404);res.end();return;}
-  pathname=pathname.slice('/flybrain/'.length);if(pathname.endsWith('/'))pathname+='index.html';
+  pathname=pathname.slice('/flybrain/'.length);if(!pathname||pathname.endsWith('/'))pathname+='index.html';
   const file=path.resolve(base,pathname);
   if(!file.startsWith(base+path.sep)){res.writeHead(403);res.end();return;}
   fs.stat(file,(err,stat)=>{if(err||!stat.isFile()){res.writeHead(404);res.end();return;}
