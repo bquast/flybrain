@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<title>FlyBrain · Music Lab</title>
+<link rel="stylesheet" href="../lab.css"><link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <a class="brand" href="../../"><span class="mark" aria-hidden="true">◉</span> FlyBrain <span>/ Music Lab</span></a>
+  <nav class="lab-nav" aria-label="Experiments"><a href="../../">Enclosure</a><a href="../drone/">Drone</a><a href="./" aria-current="page">Music</a></nav>
+  <div class="status"><span id="status-dot"></span><span id="status" role="status">Loading neural model…</span></div>
+  <a class="source" href="https://github.com/bquast/flybrain">Source ↗</a>
+</header>
+<main>
+<section>
+  <div class="toolbar"><div><span class="eyebrow">EXPERIMENT 02</span><h1>Bach, meet the fly.</h1></div><span class="badge">AUDITORY STIMULUS</span></div>
+  <div class="listening-room">
+    <div class="track-heading"><div><span class="eyebrow" id="composer">J. S. BACH</span><h2 id="track-title">Prelude in C major</h2><p id="track-detail">BWV 846 · opening eight bars · synthesized keyboard</p></div><span id="play-state" class="badge">READY TO LISTEN</span></div>
+    <div class="fly-stage">
+      <div class="ear-label"><span class="eyebrow">LEFT ANTENNA</span><strong id="input-left">0.000</strong><div class="input-meter"><i id="input-left-bar"></i></div></div>
+      <svg id="fly" viewBox="0 0 400 250" role="img" aria-label="Fly illustration; antenna highlights show stimulus strength">
+        <circle cx="200" cy="126" r="105" fill="#f5f6ef"/>
+        <circle cx="200" cy="126" r="82" fill="none" stroke="#e1e6d5" stroke-dasharray="3 6"/>
+        <g stroke="#646c58" stroke-width="2" fill="none" stroke-linecap="round"><path d="M187 111 163 83 145 79M184 132 154 130 133 146M189 151 172 180 150 191M213 111 237 83 255 79M216 132 246 130 267 146M211 151 228 180 250 191"/></g>
+        <ellipse cx="200" cy="154" rx="20" ry="34" fill="#b6a068" stroke="#8e805e" stroke-width="1.5"/>
+        <path d="M182 150Q200 156 218 150M182 161Q200 167 218 161M185 172Q200 178 215 172" fill="none" stroke="#786a46" stroke-width="3"/>
+        <ellipse cx="177" cy="150" rx="17" ry="42" transform="rotate(27 177 150)" fill="#ffffffb8" stroke="#afb9b1"/>
+        <ellipse cx="223" cy="150" rx="17" ry="42" transform="rotate(-27 223 150)" fill="#ffffffb8" stroke="#afb9b1"/>
+        <path d="m190 115-29 67m49-67 29 67" stroke="#c0c9bd"/>
+        <ellipse cx="200" cy="117" rx="19" ry="24" fill="#8a8650" stroke="#706a42"/>
+        <ellipse cx="200" cy="88" rx="18" ry="14" fill="#aaa479"/>
+        <ellipse cx="186" cy="88" rx="7" ry="10" fill="#a44335"/><ellipse cx="214" cy="88" rx="7" ry="10" fill="#a44335"/>
+        <path d="m194 78-8-17m20 17 8-17" stroke="#686b50" stroke-width="2"/>
+        <circle id="antenna-left" cx="184" cy="57" r="10" fill="#3b82f6" opacity=".18"/>
+        <circle id="antenna-right" cx="216" cy="57" r="10" fill="#328079" opacity=".18"/>
+        <circle cx="184" cy="57" r="3" fill="#526351"/><circle cx="216" cy="57" r="3" fill="#526351"/>
+      </svg>
+      <div class="ear-label"><span class="eyebrow">RIGHT ANTENNA</span><strong id="input-right">0.000</strong><div class="input-meter right"><i id="input-right-bar"></i></div></div>
+    </div>
+    <div class="spectrum-heading"><span class="eyebrow">AUDIO SPECTRUM</span><span>60–1,000 Hz drives the model</span></div>
+    <canvas id="spectrum" aria-label="Live frequency spectrum of the filtered audio"></canvas>
+    <div class="frequency-labels"><span>60 Hz</span><span>250 Hz</span><span>500 Hz</span><span>1,000 Hz</span></div>
+    <div class="play-progress"><div id="progress"></div></div>
+    <div class="timeline"><span id="clock">0:00</span><span id="duration">0:28</span></div>
+  </div>
+  <div class="flight-actions"><button id="play" class="primary" disabled>Play Bach</button><button id="reset">Reset trial</button><button id="export" disabled>Export CSV</button><span>Audio stays on your device</span></div>
+  <p id="notice" class="note" role="status">Loading the connectome. Press Play when ready to hear the music and stimulate its auditory neurons.</p>
+  <section class="panel trace-panel">
+    <div class="section-title"><span class="eyebrow">NEURAL RESPONSE OVER TIME</span><span id="model-clock">0.00 s model time</span></div>
+    <div class="legend"><span class="sensory">Auditory input</span><span class="central">First-hop targets</span><span class="descending">Descending</span><span class="motor">Motor</span></div>
+    <canvas id="trace" aria-label="Neural response history; logarithmic display scale from zero to one"></canvas>
+    <p class="small">Mean simulated rates · log display scale · latest 200 samples. The fly illustration shows input level, not a measured behavior.</p>
+  </section>
+</section>
+<aside>
+  <section class="panel">
+    <span class="eyebrow">LISTENING SETTINGS</span>
+    <label for="track">Sound</label><select id="track"><option value="bach">Bach · Prelude in C</option><option value="tone">220 Hz pulses · control</option><option value="file">Your audio file</option></select>
+    <div id="upload" hidden><label for="audio-file">Choose audio</label><input id="audio-file" type="file" accept="audio/*"><p class="small">MP3, WAV or any format your browser can decode. Up to 2 minutes / 30 MB. Never uploaded.</p></div>
+    <div class="setting-row"><label for="volume">Speaker volume</label><output id="volume-value" for="volume">35%</output></div><input id="volume" type="range" min="0" max="100" value="35">
+    <p class="small">For your ears; does not change neural input.</p>
+    <div class="setting-row"><label for="gain">Stimulus strength</label><output id="gain-value" for="gain">1.0×</output></div><input id="gain" type="range" min="0" max="4" step=".1" value="1">
+    <div class="setting-row"><label for="pan">Stimulus direction</label><output id="pan-value" for="pan">Both sides</output></div><input id="pan" type="range" min="-1" max="1" step=".1" value="0"><div class="range-ends"><span>Left</span><span>Right</span></div>
+    <label class="toggle"><input id="silence" type="checkbox"> Silence input to the fly</label><p class="small">Music continues for you; neural activity can decay.</p>
+  </section>
+  <section class="panel activity">
+    <div class="section-title"><span class="eyebrow">NEURAL ACTIVITY</span><span>LEFT / RIGHT</span></div>
+    <div id="probes"></div>
+    <p class="small">JO-A / JO-B are stimulated sensory cells. First-hop, descending and motor neurons receive activity only through the graph. Bars use a log display scale; numbers are raw mean rates.</p>
+    <div class="stats"><span id="active-count">0 active neurons</span><span id="compute-time">— ms / step</span></div>
+    <p class="small" id="sampling">Audio plays in real time. Each neural update samples the current sound and advances the model by 20 ms; slower devices take fewer samples.</p>
+  </section>
+  <details class="panel"><summary>What is the fly hearing?</summary>
+    <p>We take the amplitude of audio filtered to 60–1,000 Hz and feed a bounded drive into MaleCNS cells labelled <strong>auditory</strong> with types JO-A or JO-B: neurons from Johnston's organ in the antennae.</p>
+    <p>This is an engineered sensory adapter. It does not model air-particle motion, antenna mechanics, subtype frequency tuning, musical understanding or enjoyment. Both JO families receive the same amplitude signal. The direction slider scales left/right input using anatomical side labels.</p>
+    <p>The shared rate model propagates that drive through the connectome. Connections are anatomical; their dynamics are simplified and uncalibrated. Unlabelled or centre-side cells are excluded from bilateral plots.</p>
+    <p>Change the stimulus, mute it, or compare Bach with the pulsed tone. Reset starts a fresh trial. CSV records both audio and model clocks, settings, inputs and responses.</p>
+    <a href="https://github.com/bquast/flybrain/blob/master/experiments/music/README.md">Methods and sources ↗</a>
+  </details>
+</aside>
+</main>
+<script src="core.js"></script><script src="app.js"></script>
+</body></html>

@@ -1,0 +1,33 @@
+.badge { font-size: 9px; letter-spacing: 1px; color: #4a6d37; background: #eef3e3; border: 1px solid #dee7ca; padding: 6px 9px; border-radius: 5px; white-space: nowrap; }
+.listening-room { background: #fafaf7; border: 1px solid var(--line); border-radius: 10px; padding: 24px 28px 18px; }
+.track-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+h2 { font-size: 24px; font-weight: 500; letter-spacing: -.6px; margin: 7px 0 5px; }
+.track-heading p { color: var(--muted); font-size: 12px; margin: 0; }
+.fly-stage { display: flex; align-items: center; justify-content: center; gap: 20px; padding: 8px 0; }
+#fly { width: min(48%,400px); height: auto; }
+.ear-label { flex: 0 1 130px; text-align: center; }
+.ear-label .eyebrow { letter-spacing: 1px; font-size: 9px; }
+.ear-label strong { display: block; font: 24px/1.5 ui-monospace,monospace; margin-top: 6px; }
+.input-meter { height: 4px; background: #e7e9e2; border-radius: 3px; overflow: hidden; margin: 9px 14px; }
+.input-meter i { display: block; width: 0; height: 100%; background: var(--sensory); }
+.input-meter.right i { background: var(--cyan); }
+.spectrum-heading { display: flex; justify-content: space-between; gap: 10px; font-size: 10px; color: var(--muted); margin-top: 10px; }
+#spectrum { width: 100%; height: 86px; display: block; margin-top: 10px; }
+.frequency-labels,.timeline { display: flex; justify-content: space-between; font: 10px ui-monospace,monospace; color: var(--muted); }
+.play-progress { height: 3px; background: #e4e5dd; border-radius: 3px; overflow: hidden; margin-top: 24px; }
+#progress { height: 100%; width: 0; background: var(--green); }
+.timeline { margin-top: 8px; }
+.trace-panel { margin-top: 22px; }
+.legend { display: flex; gap: 16px; font-size: 10px; margin-top: 16px; flex-wrap: wrap; }
+.legend span::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: currentColor; margin-right: 6px; }
+.sensory { color: #3b82f6; }.central { color: #8b5cf6; }.descending { color: #328079; }.motor { color: #e66a47; }
+#trace { width: 100%; height: 160px; display: block; margin-top: 12px; }
+.probe { grid-template-columns: 66px 1fr 1fr; }
+.probe-side { min-width: 0; }
+.probe-side small { display: block; text-align: right; font: 10px ui-monospace,monospace; color: var(--muted); margin-top: 4px; }
+.probe-side:last-child .meter>i { background: var(--cyan); }
+#upload { margin-top: 14px; }#upload label { display: block; font-size: 12px; margin-bottom: 7px; }
+input[type=file] { width: 100%; font-size: 11px; }
+.panel>label.toggle { display: flex; align-items: center; gap: 6px; margin-top: 20px; color: var(--text); }
+@media(max-width:1000px) { .listening-room { padding: 20px; } .fly-stage { gap: 8px; } h2 { font-size: 21px; } .track-heading .badge { display: none; } }
+@media(max-width:470px) { .toolbar>.badge { display: none; } .listening-room { padding: 18px; } .fly-stage { margin: 16px -8px; } .ear-label .eyebrow { font-size: 8px; letter-spacing: 0; }.ear-label strong { font-size: 18px; } .spectrum-heading>span:last-child { font-size: 9px; } .legend { gap: 8px 14px; } }
