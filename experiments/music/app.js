@@ -7,7 +7,8 @@ let ready=false,playing=false,busy=false,resetting=false,starting=false,epoch=0,
 let dataset=null,context=null,volume=null,highpass=null,analyser=null,source=null,buffer=null;
 let offset=0,startedAt=0,lastSampleWall=-Infinity,modelTime=0,rows=[],history=[],lastOutput=null;
 let waveform=null,spectrum=null,trackGeneration=0;
-const pending=new Map(),worker=new Worker('./worker.js');
+let loadError='',loadMessage='Loading the brain…',loadLabel='Loading brain…';
+const pending=new Map(),worker=new Worker('./worker.js?v=2');
 const formatTime=t=>Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0');
 const audioTime=()=>buffer?Math.min(buffer.duration,offset+(playing?context.currentTime-startedAt:0)):0;
 for(const name of C.PROBES){
@@ -24,9 +25,14 @@ for(const name of C.PROBES){
   $('probes').appendChild(row);
 }
 function updateControls(){
-  $('play').disabled=!ready||resetting||starting||($('track').value==='file'&&!buffer);
-  $('play').textContent=playing?'Pause':offset>0?'Resume':$('track').value==='bach'?'Play Bach':'Play sound';
+  $('play').disabled=!loadError&&(!ready||resetting||starting||($('track').value==='file'&&!buffer));
+  $('play').textContent=loadError?'Retry loading':!ready?loadLabel:resetting?'Resetting…':starting?'Starting…':playing?'Pause':offset>0?'Resume':$('track').value==='bach'?'Play Bach':'Play sound';
+  $('reset').disabled=!ready||resetting||starting;
+  if(!ready)$('play-state').textContent=loadError?'LOAD FAILED':'LOADING BRAIN';
   $('export').disabled=rows.length===0;
+}
+function notice(message){
+  $('notice').textContent=loadError?loadError+' Press Retry loading to try again.':!ready?loadMessage+' The first load downloads about 96 MB, then builds the neural model. Play will become available automatically.':message;
 }
 function stopAudio(){
   if(playing)offset=audioTime();
@@ -35,8 +41,8 @@ function stopAudio(){
   $('play-state').textContent=offset>0?'PAUSED':'READY TO LISTEN';updateControls();
 }
 function fail(message){
-  stopAudio();ready=false;updateControls();$('status').textContent='Neural model unavailable';
-  $('status-dot').style.background='#b3261e';$('notice').textContent=message+' Reload the page to try again.';
+  stopAudio();ready=false;loadError=message;updateControls();$('status').textContent='Neural model unavailable';
+  $('status-dot').style.background='#b3261e';notice();
 }
 function rpc(type,body={}){
   return new Promise((resolve,reject)=>{
@@ -45,13 +51,17 @@ function rpc(type,body={}){
   });
 }
 worker.onmessage=({data:m})=>{
-  if(m.type==='progress')$('status').textContent=m.text;
+  if(m.type==='progress'){
+    loadMessage=m.text;loadLabel=m.phase==='building'?'Building brain…':'Loading brain…';
+    $('status').textContent=m.text;notice();updateControls();
+  }
   else if(m.type==='ready'){
-    ready=true;dataset=m.dataset;
+    ready=true;loadError='';dataset=m.dataset;
     $('status').textContent=dataset.label+' · '+m.neurons.toLocaleString()+' neurons';$('status-dot').style.background='var(--green)';
     for(const name of C.PROBES)for(const side of ['left','right'])$('probe-'+name+'-'+side).parentElement.title=(m.counts[name]?.[side]||0)+' annotated cells';
     const n=['JO-A','JO-B'].reduce((sum,name)=>sum+m.counts[name].left+m.counts[name].right,0);
-    $('notice').textContent='Ready. Press Play to hear Bach and stimulate '+n+' annotated auditory neurons. Try silencing the input while the music continues.';
+    $('play-state').textContent='READY TO LISTEN';
+    notice($('track').value==='file'&&!buffer?'Brain ready. Choose a local audio file to enable Play.':'Ready. Press Play to stimulate '+n+' annotated auditory neurons. Try silencing the input while the music continues.');
     window.musicLab.counts=m.counts;updateControls();
   }else{
     const p=pending.get(m.id);
@@ -76,6 +86,7 @@ function initAudio(){
   waveform=new Float32Array(analyser.fftSize);spectrum=new Float32Array(analyser.frequencyBinCount);
 }
 async function play(){
+  if(loadError){location.reload();return;}
   if(playing){stopAudio();return;}
   if(!ready||resetting||starting)return;
   starting=true;updateControls();const runEpoch=epoch;
@@ -116,7 +127,7 @@ $('track').onchange=async()=>{
   const generation=++trackGeneration;buffer=null;$('audio-file').value='';
   $('upload').hidden=$('track').value!=='file';setTrackHeading();
   await resetTrial();if(generation!==trackGeneration)return;
-  $('notice').textContent=$('track').value==='file'?'Choose a local audio file, then press Play.':'New sound selected. Press Play to begin a fresh trial.';
+  notice($('track').value==='file'?'Choose a local audio file, then press Play.':'New sound selected. Press Play to begin a fresh trial.');
 };
 $('audio-file').onchange=async()=>{
   const file=$('audio-file').files[0];if(!file)return;
@@ -129,11 +140,11 @@ $('audio-file').onchange=async()=>{
     if(generation!==trackGeneration)return;
     if(decoded.duration>120)throw Error('Please choose an excerpt of 2 minutes or less.');
     buffer=decoded;$('track-title').textContent=file.name;$('track-detail').textContent=formatTime(buffer.duration)+' · local audio · never uploaded';
-    $('duration').textContent=formatTime(buffer.duration);$('notice').textContent='Audio loaded. Press Play to begin.';
+    $('duration').textContent=formatTime(buffer.duration);notice('Audio loaded. Press Play to begin.');
   }catch(error){if(generation===trackGeneration){buffer=null;$('notice').textContent='Could not load that audio. '+error.message;}}
   finally{updateControls();}
 };
-$('play').onclick=play;$('reset').onclick=()=>resetTrial().then(()=>{$('notice').textContent='Trial reset. Press Play to start from silence.';});
+$('play').onclick=play;$('reset').onclick=()=>resetTrial().then(()=>notice('Trial reset. Press Play to start from silence.'));
 $('volume').oninput=()=>{$('volume-value').textContent=$('volume').value+'%';if(volume)volume.gain.setTargetAtTime(Number($('volume').value)/100,context.currentTime,.025);};
 $('gain').oninput=()=>{$('gain-value').textContent=Number($('gain').value).toFixed(1)+'×';};
 $('pan').oninput=()=>{const p=Number($('pan').value);$('pan-value').textContent=p===0?'Both sides':Math.round(Math.abs(p)*100)+'% '+(p<0?'left':'right');};
@@ -212,5 +223,5 @@ window.addEventListener('resize',drawTrace);
 window.addEventListener('pagehide',()=>{stopAudio();worker.terminate();context?.close();});
 window.addEventListener('pageshow',event=>{if(event.persisted)location.reload();});
 window.musicLab={get ready(){return ready;},get state(){return {playing,ready,modelTime,audioTime:audioTime(),samples:rows.length,output:lastOutput,dataset};}};
-worker.postMessage({type:'init'});drawTrace();requestAnimationFrame(frame);
+updateControls();notice();worker.postMessage({type:'init'});drawTrace();requestAnimationFrame(frame);
 })();

@@ -5,6 +5,7 @@ self.onmessage=async ({data:m})=>{
   try{
     if(m.type==='init'){
       const {buffer,index,dataset}=await FlyBrainDatasets.load('../../data/dataset.json',text=>self.postMessage({type:'progress',text}));
+      self.postMessage({type:'progress',phase:'building',text:'Download complete. Building neural connections…'});
       const auditory=MusicCore.auditoryGroups(index);
       brain=new FlyBrainRateModel.BrainModel(buffer,{...index,groups:{...index.groups,...auditory}},
         {driveNames:['JO-A','JO-B'],probeNames:MusicCore.PROBES});

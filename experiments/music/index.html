@@ -45,8 +45,8 @@
     <div class="play-progress"><div id="progress"></div></div>
     <div class="timeline"><span id="clock">0:00</span><span id="duration">0:28</span></div>
   </div>
-  <div class="flight-actions"><button id="play" class="primary" disabled>Play Bach</button><button id="reset">Reset trial</button><button id="export" disabled>Export CSV</button><span>Audio stays on your device</span></div>
-  <p id="notice" class="note" role="status">Loading the connectome. Press Play when ready to hear the music and stimulate its auditory neurons.</p>
+  <div class="flight-actions"><button id="play" class="primary" disabled>Loading brain…</button><button id="reset" disabled>Reset trial</button><button id="export" disabled>Export CSV</button><span>Audio stays on your device</span></div>
+  <p id="notice" class="note" role="status">Loading the brain. The first load downloads about 96 MB, then builds the neural model. Play will become available automatically.</p>
   <section class="panel trace-panel">
     <div class="section-title"><span class="eyebrow">NEURAL RESPONSE OVER TIME</span><span id="model-clock">0.00 s model time</span></div>
     <div class="legend"><span class="sensory">Auditory input</span><span class="central">First-hop targets</span><span class="descending">Descending</span><span class="motor">Motor</span></div>
@@ -81,5 +81,5 @@
   </details>
 </aside>
 </main>
-<script src="core.js"></script><script src="app.js"></script>
+<script src="core.js"></script><script src="app.js?v=2"></script>
 </body></html>
